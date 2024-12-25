@@ -26,6 +26,17 @@
 *.a
 *.lib
 
+# Ignore Visual Studio temporary files
+.vs/
+*.vcxproj.user
+*.suo
+
+# Ignore build artifacts
+*.obj
+*.exe
+*.dll
+*.pdb
+
 # Executables
 *.exe
 *.out
