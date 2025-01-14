@@ -348,25 +348,30 @@ void saveInFile(Movie* movies)
     output_stream.close();
 }
 
+void printMovie(Movie movie)
+{
+    cout << "Title: " << movie.title << endl
+        << "Year: " << movie.year << endl
+        << "Genre: " << movie.genre << endl
+        << "Director: " << movie.director << endl
+        << "Actors: " << movie.cast << endl
+        << "Rating: " << (round(movie.rating * 10.0) / 10.0) << endl;
+
+    cout << endl;
+}
 void seeAllMovies()
 {
     Movie* movies=openFile();
     //ANSI code to clear the console.
     cout << "\033[2J\033[H";
+    int mCount = movieCount(movies);
     if (movies == nullptr) cerr << "No data!" << endl;
     else
     {
-        for (int i=0;i<30;i++)
+        for (int i=0;i<mCount;i++)
         {
             if (movies[i].title[0] == '\0') break;
-            cout << "Title: " << movies[i].title << endl
-                 << "Year: " << movies[i].year << endl
-                 << "Genre: " << movies[i].genre << endl
-                 << "Director: " << movies[i].director << endl
-                 << "Actors: " << movies[i].cast << endl
-                 << "Rating: " << (round(movies[i].rating * 10.0) / 10.0)<< endl;
-
-            cout << endl;
+            printMovie(movies[i]);
         }
     }
     delete[]movies;
@@ -435,13 +440,69 @@ void sortMoviesByRating()
     }
     saveInFile(movies);
 }
+
 void searchMoviesByTitle()
 {
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    cout << "What movie are you looking for?"<<endl;
+    char inputTitle[50];
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputTitle, 100);
+    cout << endl;
+    if (movies == nullptr)
+    {
+        cerr << "No data!" << endl;
+        return;
+    }
+    int i = 0;
+    for (i = 0; i < 30; i++)
+    {
 
+        if (movies[i].title[0] == '\0')
+        {
+            cerr << "There was no movie found with this title." << endl;
+            return;
+        }
+        if (strCompare(movies[i].title, inputTitle) == 0)
+        {
+            break;
+        }
+    }
+    printMovie(movies[i]);
 }
+
 void searchMoviesByGenre()
 {
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    cout << "What genre of movies are you looking for?" << endl;
+    char inputGenre[50];
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputGenre, 50);
+    cout << endl;
+    if (movies == nullptr)
+    {
+        cerr << "No data!" << endl;
+        return;
+    }
+    int i = 0;
+    for (i = 0; i < 30; i++)
+    {
 
+        if (movies[i].title[0] == '\0')
+        {
+            cerr << "There is nothing else in "<<inputGenre<<"." << endl;
+            return;
+        }
+        if (strCompare(movies[i].genre, inputGenre) == 0)
+        {
+            printMovie(movies[i]);
+        }
+    }
+    
 }
 void addMovie()
 {
@@ -468,8 +529,8 @@ void manageMenuChoice(bool isAdmin)
             case '1': seeAllMovies(); break;
             case '2': addRating(); break;
             case '3': sortMoviesByRating(); break;
-            case '4': break;
-            case '5': break;
+            case '4': searchMoviesByTitle(); break;
+            case '5': searchMoviesByGenre(); break;
             case '6': break;
             case '7': break;
             case '8': break;

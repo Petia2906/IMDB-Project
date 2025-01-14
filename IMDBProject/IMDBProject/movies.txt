@@ -1,2 +1,14 @@
 Harry Potter and the Philosopher's Stone;2001;Fantasy;Chris Columbus;Daniel Radcliffe, Emma Watson, Rupert Grint;7.7;1
 The Hunger Games;2012;Dystopia;Gary Ross;Jennifer Lawrence, Josh Hutcherson;7.2;1
+Inception;2010;Sci-Fi;Christopher Nolan;Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page;8.8;3
+The Lord of the Rings: The Fellowship of the Ring;2001;Fantasy;Peter Jackson;Elijah Wood, Ian McKellen, Orlando Bloom;8.8;3
+Forrest Gump;1994;Drama;Robert Zemeckis;Tom Hanks, Robin Wright, Gary Sinise;8.8;3
+Titanic;1997;Romance;James Cameron;Leonardo DiCaprio, Kate Winslet, Billy Zane;7.9;3
+The Matrix;1999;Sci-Fi;The Wachowskis;Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss;8.7;2
+Interstellar;2014;Sci-Fi;Christopher Nolan;Matthew McConaughey, Anne Hathaway, Jessica Chastain;8.6;2
+Star Wars: Episode IV - A New Hope;1977;Sci-Fi;George Lucas;Mark Hamill, Harrison Ford, Carrie Fisher;8.6;2
+The Lion King;1994;Animation;Roger Allers, Rob Minkoff;Matthew Broderick, Jeremy Irons, James Earl Jones;8.5;2
+Frozen;2013;Animation;Chris Buck, Jennifer Lee;Kristen Bell, Idina Menzel, Jonathan Groff;7.4;1
+Toy Story;1995;Animation;John Lasseter;Tom Hanks, Tim Allen, Don Rickles;8.3;2
+The Avengers;2012;Action;Joss Whedon;Robert Downey Jr., Chris Evans, Scarlett Johansson;8.0;3
+Jurassic Park;1993;Adventure;Steven Spielberg;Sam Neill, Laura Dern, Jeff Goldblum;8.2;2
