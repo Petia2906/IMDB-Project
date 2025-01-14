@@ -138,6 +138,13 @@ char menu(bool isAdmin)
     return choice;
 }
 
+int movieCount(Movie* movies)
+{
+    int count = 0;
+    while (movies[count++].title[0] != '\0');
+    return --count;
+}
+
 Movie lineToData(char line[])
 {
     Movie movie;
@@ -313,9 +320,10 @@ char* dataToLine(Movie movie)
         countRating = countRating / 10;
         lineIndex--;
     }
-
+    line[++lineIndex] = '\0';
     return line;
 }
+
 void saveInFile(Movie* movies)
 {
     string file_name = "moviesRes.txt";
@@ -325,8 +333,13 @@ void saveInFile(Movie* movies)
     }
     char* line;
     int index = 0;
-    while (line = dataToLine(movies[index]))
+    int moviesCount = movieCount(movies);
+    while (index<moviesCount)
     { 
+        line = dataToLine(movies[index]);
+        if (line[0] == ';') {
+            break;
+        }
         output_stream << line << std::endl;
         delete[] line;
         line = nullptr;
@@ -334,6 +347,7 @@ void saveInFile(Movie* movies)
     }
     output_stream.close();
 }
+
 void seeAllMovies()
 {
     Movie* movies=openFile();
@@ -404,7 +418,22 @@ void addRating()
 
 void sortMoviesByRating()
 {
-
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    int mCount = movieCount(movies);
+    for (int i = 0; i < mCount; i++)
+    {
+        for (int j = i+1; j < mCount; j++)
+        {
+            if (movies[i].rating < movies[j].rating) {
+                Movie temp = movies[i];
+                movies[i] = movies[j];
+                movies[j] = temp;
+            }
+        }
+    }
+    saveInFile(movies);
 }
 void searchMoviesByTitle()
 {
@@ -438,7 +467,7 @@ void manageMenuChoice(bool isAdmin)
             case '0': return; break;
             case '1': seeAllMovies(); break;
             case '2': addRating(); break;
-            case '3': break;
+            case '3': sortMoviesByRating(); break;
             case '4': break;
             case '5': break;
             case '6': break;
