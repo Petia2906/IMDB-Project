@@ -1,15 +1,17 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 using namespace std;
 
 struct Movie
 {
-    char title[120];
+    char title[120] = {'\0'};
     int year;
     char genre[50];
     char director[50];
     char cast[270];
     double rating;
+    int ratingsCount;
 };
 
 /// <summary>
@@ -185,7 +187,7 @@ Movie lineToData(char line[])
     movie.rating = 0.0;
     bool decimalFound = false;
     double decimalPlace = 0.1;
-    while (line[lineIndex] != '\0') {
+    while (line[lineIndex] != ';') {
         if (line[lineIndex] == '.') {
             decimalFound = true;
         }
@@ -198,6 +200,15 @@ Movie lineToData(char line[])
                 movie.rating = movie.rating * 10 + (line[lineIndex] - '0');
             }
         }
+        lineIndex++;
+    }
+    //Parse the number of people who rated the movie
+    lineIndex--;
+    movie.ratingsCount = 0;
+    char a = line[lineIndex];
+    while (line[lineIndex] >= '0' && line[lineIndex] <= '9')
+    {
+        movie.ratingsCount = movie.ratingsCount * 10 + (line[lineIndex] - '0');
         lineIndex++;
     }
     return movie;
@@ -223,6 +234,106 @@ Movie* openFile()
     return movies;
 }
 
+char* dataToLine(Movie movie)
+{
+    char* line= new char[500];
+    int lineIndex = 0;
+    int movieFieldIndex = 0;
+
+    //Parse title
+    while (movie.title[movieFieldIndex] != '\0')
+    {
+        line[lineIndex] = movie.title[movieFieldIndex];
+        lineIndex++;
+        movieFieldIndex++;
+    }
+    line[lineIndex] = ';';
+    
+    //Parse year
+    line[++lineIndex] = (char)((movie.year / 1000) + '0');
+    line[++lineIndex] = (char)(((movie.year / 100) %10) + '0');
+    line[++lineIndex] = (char)(((movie.year / 10) %10) + '0');
+    line[++lineIndex] = (char)(movie.year%10 + '0');
+    line[++lineIndex] = ';';
+
+    //Parse genre
+    movieFieldIndex = 0;
+    lineIndex++;
+    while (movie.genre[movieFieldIndex] != '\0')
+    {
+        line[lineIndex] = movie.genre[movieFieldIndex];
+        lineIndex++;
+        movieFieldIndex++;
+    }
+    line[lineIndex] = ';';
+
+    //Parse director
+    movieFieldIndex = 0;
+    lineIndex++;
+    while (movie.director[movieFieldIndex] != '\0')
+    {
+        line[lineIndex] = movie.director[movieFieldIndex];
+        lineIndex++;
+        movieFieldIndex++;
+    }
+    line[lineIndex] = ';';
+
+    //Parse actors
+    movieFieldIndex = 0;
+    lineIndex++;
+    while (movie.cast[movieFieldIndex] != '\0')
+    {
+        line[lineIndex] = movie.cast[movieFieldIndex];
+        lineIndex++;
+        movieFieldIndex++;
+    }
+    line[lineIndex] = ';';
+
+    //Parse rating
+    double rating = movie.rating;
+    double remainder = rating - floor(movie.rating)*10;
+    line[++lineIndex] = (char)(rating + '0');
+    line[++lineIndex] = '.';
+    line[++lineIndex] = (char)((int)remainder + '0');
+    line[++lineIndex] = ';';
+
+    //Parse count rating
+    int countRating = movie.ratingsCount;
+    int temp = countRating;
+    int digitCount = 0;
+    do 
+    {
+        digitCount++;
+        temp /= 10;
+    } while (temp > 0);
+    lineIndex = lineIndex + digitCount;
+    for (int i = 0; i < digitCount; i++)
+    {
+        line[lineIndex] == (char)((countRating % 10) + '0');
+        countRating = countRating / 10;
+        lineIndex--;
+    }
+
+    return line;
+}
+void saveInFile(Movie* movies)
+{
+    string file_name = "moviesRes.txt";
+    ofstream output_stream(file_name);
+    if (!output_stream) {
+        cerr << "Can't open output file!" << endl;
+    }
+    char* line;
+    int index = 0;
+    while (line = dataToLine(movies[index]))
+    { 
+        output_stream << line << std::endl;
+        delete[] line;
+        line = nullptr;
+        index++;
+    }
+    output_stream.close();
+}
 void seeAllMovies()
 {
     Movie* movies=openFile();
@@ -231,27 +342,66 @@ void seeAllMovies()
     if (movies == nullptr) cerr << "No data!" << endl;
     else
     {
-        for (int i=0;i<2;i++)
+        for (int i=0;i<30;i++)
         {
-            if (movies[i].year==0) break;
-            else
-            {
-                cout << "Title: " << movies[i].title << endl
-                     <<"Year: "<<movies[i].year<<endl
-                     <<"Genre: "<<movies[i].genre<<endl
-                     <<"Director: "<<movies[i].director<<endl
-                     <<"Actors: "<<movies[i].cast<<endl
-                     <<"Rating: "<<movies[i].rating<<endl;
-            }
+            if (movies[i].title[0] == '\0') break;
+            cout << "Title: " << movies[i].title << endl
+                 << "Year: " << movies[i].year << endl
+                 << "Genre: " << movies[i].genre << endl
+                 << "Director: " << movies[i].director << endl
+                 << "Actors: " << movies[i].cast << endl
+                 << "Rating: " << (round(movies[i].rating * 10.0) / 10.0)<< endl;
+
             cout << endl;
         }
     }
     delete[]movies;
 }
+
 void addRating()
 {
-
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    cout << "Please type the title of the movie you want to rate: ";
+    char inputTitle[50];
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputTitle, 100);
+    cout << endl;
+    if (movies == nullptr)
+    {
+        cerr << "No data!" << endl;
+        return;
+    }
+    int i = 0;
+    for ( i = 0; i <30; i++)
+    {
+       
+        if (movies[i].title[0] == '\0')
+        {
+            cerr << "There was no movie found with this title." << endl;
+            return;
+        }
+        if (strCompare(movies[i].title, inputTitle) == 0)
+        {
+            break;
+        }
+    } 
+    cout << "How would you rate the movie " << movies[i].title << "?" << endl;
+    int rating;
+    cin >> rating;
+    while (rating < 0 || rating>10)
+    {
+        cout << "Enter a valid rating. A whole number in the interval [0,10]." << endl;
+        cin >> rating;
+    }
+    double newRating = movies[i].rating * (double)movies[i].ratingsCount + rating;
+    movies[i].ratingsCount++;
+    newRating = newRating / (double)movies[i].ratingsCount;
+    movies[i].rating = round(newRating * 10.0) / 10.0;
+    saveInFile(movies);
 }
+
 void sortMoviesByRating()
 {
 
@@ -286,8 +436,8 @@ void manageMenuChoice(bool isAdmin)
         switch (choice)
         {
             case '0': return; break;
-            case '1':seeAllMovies(); break;
-            case '2': break;
+            case '1': seeAllMovies(); break;
+            case '2': addRating(); break;
             case '3': break;
             case '4': break;
             case '5': break;

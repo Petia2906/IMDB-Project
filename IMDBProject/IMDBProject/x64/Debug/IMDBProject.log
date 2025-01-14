@@ -1,2 +1,3 @@
 ﻿  IMDBProject.cpp
+C:\Users\Petya\Desktop\University\UP\IMDB-Ptoject\IMDBProject\IMDBProject\IMDBProject.cpp(312,25): warning C4553: '==': result of expression not used; did you intend '='?
   IMDBProject.vcxproj -> C:\Users\Petya\Desktop\University\UP\IMDB-Ptoject\IMDBProject\x64\Debug\IMDBProject.exe
