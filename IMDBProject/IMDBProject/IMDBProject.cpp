@@ -359,6 +359,7 @@ void printMovie(Movie movie)
 
     cout << endl;
 }
+
 void seeAllMovies()
 {
     Movie* movies=openFile();
@@ -504,14 +505,180 @@ void searchMoviesByGenre()
     }
     
 }
+
 void addMovie()
 {
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
 
+    cout << "Enter a title name." << endl;
+    char inputTitle[120];
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputTitle, 100);
+
+    cout << "Enter year of release." << endl;
+    int inputYear;
+    cin >> inputYear;
+    std::cin.clear();
+
+    cout << "Enter the genre." << endl;
+    char inputGenre[50];
+    cin.clear();
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputGenre, 100);
+
+    cout << "Enter the director's name." << endl;
+    char inputDirector[50];
+    cin.clear();
+    cin.getline(inputDirector, 100);
+
+    cout << "Enter the names of the cast, divided by commas." << endl;
+    char inputCast[100];
+    cin.clear();
+    cin.getline(inputCast, 100);
+
+    cout << "Enter a rating." << endl;
+    double inputRating;
+    cin >> inputRating;
+
+    cout << "How many people have rated the movie? Enter 1 if you have no information." << endl;
+    int inputCountR;
+    cin >> inputCountR;
+
+    Movie newMovie;
+    int i;
+    for (i = 0; inputTitle[i] != '\0'; ++i) {
+        newMovie.title[i] = inputTitle[i];
+    }
+    newMovie.title[i] = '\0';
+    
+    newMovie.year = inputYear;
+
+    for (i = 0; inputGenre[i] != '\0'; ++i) {
+        newMovie.genre[i] = inputGenre[i];
+    }
+    newMovie.genre[i] = '\0';
+
+    for (i = 0; inputDirector[i] != '\0'; ++i) {
+        newMovie.director[i] = inputDirector[i];
+    }
+    newMovie.director[i] = '\0';
+
+    for (i = 0; inputCast[i] != '\0'; ++i) {
+        newMovie.cast[i] = inputCast[i];
+    }
+    newMovie.cast[i] = '\0';
+
+    newMovie.rating = inputRating;
+
+    newMovie.ratingsCount = inputCountR;
+
+    int mCount = movieCount(movies);
+    movies[mCount] = newMovie;
+    saveInFile(movies);
 }
+
 void editMovie()
 {
+    Movie* movies = openFile();
+    cout << "\033[2J\033[H";
+    cout << "Which movie are you going to edit?" << endl;
+    char inputTitle[50];
+    cin.clear();
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputTitle, 100);
+    cout << endl;
+    if (movies == nullptr)
+    {
+        cerr << "No data!" << endl;
+        return;
+    }
+    int i = 0;
+    for (i = 0; i < 30; i++)
+    {
 
+        if (movies[i].title[0] == '\0')
+        {
+            cerr << "There was no movie found with this title." << endl;
+            return;
+        }
+        if (strCompare(movies[i].title, inputTitle) == 0)
+        {
+            printMovie(movies[i]);
+            char choice;
+            while (true)
+            { 
+
+                cout << "What would you like to edit:" << endl
+                << "1. Title" << endl
+                << "2. Year of release" << endl
+                << "3. Genre" << endl
+                << "4. Director" << endl
+                << "5. Cast" << endl
+                << "6. Rating" << endl
+                << "0. Back to menu" << endl;
+
+                cin >> choice;
+                switch(choice)
+                { 
+                case '0': return; break;
+                case '1': 
+                {
+                    cout << "Enter a new title"<<endl;
+                    cin>>movies[i].title; 
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                    
+                case '2': 
+                {
+                    cout << "Enter a new release year" << endl;
+                    cin >> movies[i].year;
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                case '3': {
+                    cout << "Enter a new genre" << endl;
+                    cin >> movies[i].genre;
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                case '4': {
+                    cout << "Enter a new director" << endl;
+                    cin >> movies[i].director;
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                case '5': {
+                    cout << "Enter a new cast" << endl;
+                    cin >> movies[i].cast;
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                case '6': {
+                    cout << "Enter a new rating" << endl;
+                    cin >> movies[i].rating;
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
+                }
+                default: cout << "Wrong input try again." << endl; break;
+                }
+                
+            }
+            
+        }
+        
+    }
+    saveInFile(movies);
 }
+
 void deleteMovie()
 {
 
@@ -531,8 +698,8 @@ void manageMenuChoice(bool isAdmin)
             case '3': sortMoviesByRating(); break;
             case '4': searchMoviesByTitle(); break;
             case '5': searchMoviesByGenre(); break;
-            case '6': break;
-            case '7': break;
+            case '6': addMovie(); break;
+            case '7': editMovie(); break;
             case '8': break;
             default: break;
         }
