@@ -2,6 +2,9 @@
 #include <fstream>
 using namespace std;
 
+/// <summary>
+/// Structure that defines movies.
+/// </summary>
 struct Movie
 {
     char title[120] = { '\0' };
@@ -58,6 +61,34 @@ int strCompare(const char* str1, const char* str2)
         return -1;
     }
     return 0;
+}
+
+/// <summary>
+/// Checks if str2 is a substring of str1.
+/// </summary>
+/// <param name="str1"></param>
+/// <param name="str2"></param>
+/// <returns>True if it is a substring, false otherwise.</returns>
+bool isSubstring(const char* str1, const char* str2)
+{
+    if (!str1 || !str2) {
+        return false;
+    }
+    if (*str2 == '\0') {
+        return true;
+    }
+    for (const char* p = str1; *p != '\0'; ++p) {
+        const char* temp1 = p;
+        const char* temp2 = str2;
+        while (*temp1 != '\0' && *temp2 != '\0' && *temp1 == *temp2) {
+            ++temp1;
+            ++temp2;
+        }
+        if (*temp2 == '\0') {
+            return true;
+        }
+    }
+    return false;
 }
 
 /// <summary>
@@ -721,12 +752,11 @@ void searchMoviesByTitle()
             cerr << "There was no movie found with this title." << endl;
             return;
         }
-        if (strCompare(movies[i].title, inputTitle) == 0)
+        if (isSubstring(movies[i].title,inputTitle))
         {
-            break;
+            printMovie(movies[i]);
         }
     }
-    printMovie(movies[i]);
     delete[] movies;
 }
 
