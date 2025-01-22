@@ -1,0 +1,4 @@
+Harry Potter and the Philosopher's Stone;2001;Fantasy;Chris Columbus;Daniel Radcliffe, Emma Watson, Rupert Grint;7.7;1
+The Hunger Games;2012;Dystopia;Gary Ross;Jennifer Lawrence, Josh Hutcherson;7.2;1
+The Lord of the Rings: The Fellowship of the Ring;2001;Fantasy;Peter Jackson;Elijah Wood, Ian McKellen, Orlando Bloom;8.8;3
+Sem1;2025;Tragedy;Petia, Maria;Petia, Maria, K;:.0;1

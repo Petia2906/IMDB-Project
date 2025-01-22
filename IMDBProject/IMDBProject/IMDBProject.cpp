@@ -1,17 +1,16 @@
 #include <iostream>
 #include <fstream>
-#include <cmath>
 using namespace std;
 
 struct Movie
 {
-    char title[120] = {'\0'};
-    int year;
-    char genre[50];
-    char director[50];
-    char cast[270];
-    double rating;
-    int ratingsCount;
+    char title[120] = { '\0' };
+    int year = 0;
+    char genre[50] = { '\0' };
+    char director[50] = { '\0' };
+    char cast[270] = { '\0' };
+    double rating = 0.0;
+    int ratingsCount = 0;
 };
 
 /// <summary>
@@ -22,7 +21,7 @@ struct Movie
 /// <returns>
 /// If any of the arrays is a nullpointer, returns -2;
 /// If the first array is lexicographically bigger, returns 1.
-/// If the first array is lexicographically bigger, returns -1.
+/// If the second array is lexicographically bigger, returns -1.
 /// If the arrays are lexicographically equal, returns 0;
 /// </returns>
 int strCompare(const char* str1, const char* str2) 
@@ -100,12 +99,12 @@ bool signIn()
 /// <param name="isAdmin"></param>
 /// <returns>A char value which represents the chosen command from the menu.</returns>
 char menu(bool isAdmin)
-{
+{ 
     cout << endl;
     cout << "-----------MENU----------" << endl;
     cout << "1.See all movies" << endl
          << "2.Add a rating" << endl
-         << "3.Sort movies by rating" << endl
+         << "3.Sort movies" << endl
          << "4.Search movie titles" << endl
          << "5.Search movie genres" << endl;
     if (isAdmin)
@@ -138,13 +137,70 @@ char menu(bool isAdmin)
     return choice;
 }
 
+/// <summary>
+/// Counts the elements in the array.
+/// </summary>
+/// <param name="movies">An array of movies.</param>
+/// <returns>The number of movies in the array.</returns>
 int movieCount(Movie* movies)
 {
+    if (!movies)
+    {
+        cerr << "No data!" << endl;
+        return 0;
+    }
     int count = 0;
     while (movies[count++].title[0] != '\0');
     return --count;
 }
 
+/// <summary>
+/// Validates whether the input string has correct values to be a rating.
+/// </summary>
+/// <param name="input">Input string of rating.</param>
+/// <returns>True if the value is correct, false otherwise.</returns>
+bool isValidRating(const char* input)
+{
+    int i = 0;
+    bool decimalFound = false;
+    int digitCountAfterDecimal = 0;
+    if (input[i] < '0' || input[i] > '9') {
+        return false;
+    }
+    while (input[i] != '\0')
+    {
+        if (input[i] == '.')
+        {
+            if (decimalFound)
+            {
+                return false;
+            }
+            decimalFound = true;
+        }
+        else if (input[i] >= '0' && input[i] <= '9')
+        {
+            if (decimalFound)
+            {
+                digitCountAfterDecimal++;
+                if (digitCountAfterDecimal > 1) {
+                    return false;
+                }
+            }
+        }
+        else 
+        {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+/// <summary>
+/// Transforms a line from the file into a movie variable.
+/// </summary>
+/// <param name="line">The line read from the file.</param>
+/// <returns>Returns the movie with the coresponding data.</returns>
 Movie lineToData(char line[])
 {
     Movie movie;
@@ -209,8 +265,9 @@ Movie lineToData(char line[])
         }
         lineIndex++;
     }
+
     //Parse the number of people who rated the movie
-    lineIndex--;
+    lineIndex++;
     movie.ratingsCount = 0;
     char a = line[lineIndex];
     while (line[lineIndex] >= '0' && line[lineIndex] <= '9')
@@ -221,6 +278,10 @@ Movie lineToData(char line[])
     return movie;
 }
 
+/// <summary>
+/// Reads the file with the movies and creates a coresponding Movie array with them.
+/// </summary>
+/// <returns>A movie array with the movies from the file.</returns>
 Movie* openFile()
 { 
     Movie* movies = new Movie[30];
@@ -241,6 +302,11 @@ Movie* openFile()
     return movies;
 }
 
+/// <summary>
+/// Converts the data in variable 
+/// </summary>
+/// <param name="movie"></param>
+/// <returns></returns>
 char* dataToLine(Movie movie)
 {
     char* line= new char[500];
@@ -298,13 +364,15 @@ char* dataToLine(Movie movie)
 
     //Parse rating
     double rating = movie.rating;
-    double remainder = rating - floor(movie.rating)*10;
-    line[++lineIndex] = (char)(rating + '0');
+    int integerPart = (int)rating;
+    int fractionalPart = (int)((rating - integerPart) * 10);
+    line[++lineIndex] = (char)(integerPart + '0');
     line[++lineIndex] = '.';
-    line[++lineIndex] = (char)((int)remainder + '0');
+    line[++lineIndex] = (char)(fractionalPart + '0');
     line[++lineIndex] = ';';
 
     //Parse count rating
+    lineIndex++;
     int countRating = movie.ratingsCount;
     int temp = countRating;
     int digitCount = 0;
@@ -313,20 +381,30 @@ char* dataToLine(Movie movie)
         digitCount++;
         temp /= 10;
     } while (temp > 0);
-    lineIndex = lineIndex + digitCount;
-    for (int i = 0; i < digitCount; i++)
-    {
-        line[lineIndex] == (char)((countRating % 10) + '0');
-        countRating = countRating / 10;
-        lineIndex--;
+    int startIndex = lineIndex + digitCount; 
+    lineIndex += digitCount - 1;             
+    for (int i = 0; i < digitCount; i++) {
+        line[lineIndex--] = (char)((countRating % 10) + '0');
+        countRating /= 10;                                   
     }
-    line[++lineIndex] = '\0';
+    lineIndex = startIndex;
+    line[lineIndex] = '\0'; 
+
     return line;
 }
 
+/// <summary>
+/// Saves the array into a file.
+/// </summary>
+/// <param name="movies">The array with movies.</param>
 void saveInFile(Movie* movies)
 {
-    string file_name = "moviesRes.txt";
+    if (!movies)
+    {
+        cerr << "No data!"<<endl;
+        return;
+    }
+    string file_name = "movies.txt";
     ofstream output_stream(file_name);
     if (!output_stream) {
         cerr << "Can't open output file!" << endl;
@@ -334,8 +412,8 @@ void saveInFile(Movie* movies)
     char* line;
     int index = 0;
     int moviesCount = movieCount(movies);
-    while (index<moviesCount)
-    { 
+    while (index < moviesCount)
+    {
         line = dataToLine(movies[index]);
         if (line[0] == ';') {
             break;
@@ -348,6 +426,10 @@ void saveInFile(Movie* movies)
     output_stream.close();
 }
 
+/// <summary>
+/// Prints the information for a movie.
+/// </summary>
+/// <param name="movie"></param>
 void printMovie(Movie movie)
 {
     cout << "Title: " << movie.title << endl
@@ -360,6 +442,9 @@ void printMovie(Movie movie)
     cout << endl;
 }
 
+/// <summary>
+/// Prints the information for all of the movies in the file onto the console.
+/// </summary>
 void seeAllMovies()
 {
     Movie* movies=openFile();
@@ -378,11 +463,15 @@ void seeAllMovies()
     delete[]movies;
 }
 
+/// <summary>
+/// Allows users and admins to add rating for a movie and saves it.
+/// </summary>
 void addRating()
 {
     Movie* movies = openFile();
     //ANSI code to clear the console.
     cout << "\033[2J\033[H";
+    //Finding the movie
     cout << "Please type the title of the movie you want to rate: ";
     char inputTitle[50];
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -394,7 +483,8 @@ void addRating()
         return;
     }
     int i = 0;
-    for ( i = 0; i <30; i++)
+    int mCount = movieCount(movies);
+    for ( i = 0; i <mCount; i++)
     {
        
         if (movies[i].title[0] == '\0')
@@ -407,21 +497,106 @@ void addRating()
             break;
         }
     } 
+    //Adding a rating and validating input
     cout << "How would you rate the movie " << movies[i].title << "?" << endl;
-    int rating;
-    cin >> rating;
-    while (rating < 0 || rating>10)
+    char inputRating[10];
+    cin.clear();
+    cin.getline(inputRating, 10);
+    while (!isValidRating(inputRating))
     {
-        cout << "Enter a valid rating. A whole number in the interval [0,10]." << endl;
-        cin >> rating;
+        cin.clear();
+        cin.getline(inputRating, 10);
     }
-    double newRating = movies[i].rating * (double)movies[i].ratingsCount + rating;
+
+    double newRating = 0.0;
+    int index = 0;
+    bool decimalFound = false;
+    double decimalPlace = 0.1;
+    while (inputRating[index] != '\0')
+    {
+        if (inputRating[index] == '.')
+        {
+            decimalFound = true;
+        }
+        else 
+        {
+            if (decimalFound) 
+            {
+                newRating += (inputRating[index] - '0') * decimalPlace;
+                decimalPlace /= 10;
+            }
+            else 
+            {
+                newRating = newRating * 10 + (inputRating[index] - '0');
+            }
+        }
+        index++;
+    }
+
+    //Changing the rating for the movie
     movies[i].ratingsCount++;
-    newRating = newRating / (double)movies[i].ratingsCount;
-    movies[i].rating = round(newRating * 10.0) / 10.0;
+    double totalRating = movies[i].rating * (movies[i].ratingsCount - 1) + newRating;
+    movies[i].rating = round((totalRating / movies[i].ratingsCount) * 10.0) / 10.0;
     saveInFile(movies);
+    delete[] movies;
 }
 
+/// <summary>
+/// Prints out movies with certain rating
+/// </summary>
+void filterByRating()
+{
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    cout << "Enter your minimal rating." << endl;
+
+    char inputRating [10];
+    cin >> inputRating;
+    while (!isValidRating(inputRating))
+    {
+        cout << "Wrong input! Try againg." << endl;
+        cin >> inputRating;
+        continue;
+    }
+    cout << "These are the movies with rating " << inputRating << " and above:"<<endl;
+
+    int i = 0;
+    double actualRating =0.0;
+    int index = 0;
+    bool decimalFound = false;
+    double decimalPlace = 0.1;
+    while (inputRating[index] != '\0')
+    {
+        if (inputRating[index] == '.')
+        {
+            decimalFound = true;
+        }
+        else
+        {
+            if (decimalFound)
+            {
+                actualRating += (inputRating[index] - '0') * decimalPlace;
+                decimalPlace /= 10;
+            }
+            else
+            {
+                actualRating = actualRating * 10 + (inputRating[index] - '0');
+            }
+        }
+        index++;
+    }
+    while (movies[i].title[0] != '\0')
+    {
+        if (movies[i].rating >= actualRating) printMovie(movies[i]);
+        i++;
+    }
+    delete[] movies;
+}
+
+/// <summary>
+/// Sorts movies by rating and saves it.
+/// </summary>
 void sortMoviesByRating()
 {
     Movie* movies = openFile();
@@ -440,8 +615,88 @@ void sortMoviesByRating()
         }
     }
     saveInFile(movies);
+    seeAllMovies();
+    delete[] movies;
+
+    cout << "Would you like to filter these movies by a rating?" << endl
+        << "1. Yes" << endl
+        << "2. No" << endl;
+    bool isValidChoice = false;
+    char choice; 
+    cin >> choice;
+    do
+    {       
+        if (choice != '1' && choice != '2')
+        {
+            cout << "Wrong input! Try againg." << endl;
+            cin >> choice;
+            continue;
+        }
+        isValidChoice = true;
+    } while (!isValidChoice);
+    switch (choice)
+    {
+    case '1': filterByRating(); break;
+    case '2':break;
+    }
 }
 
+/// <summary>
+/// Sorts movies by title and saves it in the file.
+/// </summary>
+void sortMoviesByTitle()
+{
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    int mCount = movieCount(movies);
+    for (int i = 0; i < mCount; i++)
+    {
+        for (int j = i + 1; j < mCount; j++)
+        {
+            if (strCompare(movies[i].title, movies[j].title)==1) {
+                Movie temp = movies[i];
+                movies[i] = movies[j];
+                movies[j] = temp;
+            }
+        }
+    }
+    saveInFile(movies);
+    delete[] movies;
+    seeAllMovies();
+}
+
+/// <summary>
+/// Manages the sorting choice.
+/// </summary>
+void manageSortChoice()
+{
+    cout << "\033[2J\033[H";
+    cout << "How would you like to sort the movies?" << endl
+        << "1. By title" << endl
+        << "2. By rating" << endl;
+    bool isValidChoice = false;
+    char choice;
+    cin >> choice;
+    if (choice != '1' && choice != '2')
+    {
+        while (!isValidChoice)
+        {
+            cout << "Wrong input! Try againg!" << endl;
+            cin >> choice;
+            if (choice == '1' || choice == '2') isValidChoice = true;
+        }
+    }
+    switch (choice)
+    {
+    case '1': sortMoviesByTitle(); break;
+    case '2': sortMoviesByRating(); break;
+    }
+}
+
+/// <summary>
+/// Prints the movie with a matching title.
+/// </summary>
 void searchMoviesByTitle()
 {
     Movie* movies = openFile();
@@ -472,8 +727,12 @@ void searchMoviesByTitle()
         }
     }
     printMovie(movies[i]);
+    delete[] movies;
 }
 
+/// <summary>
+/// Prints out the movies with matching genre.
+/// </summary>
 void searchMoviesByGenre()
 {
     Movie* movies = openFile();
@@ -503,9 +762,12 @@ void searchMoviesByGenre()
             printMovie(movies[i]);
         }
     }
-    
+    delete[] movies;
 }
 
+/// <summary>
+/// Allows admins to add new movies.
+/// </summary>
 void addMovie()
 {
     Movie* movies = openFile();
@@ -513,38 +775,78 @@ void addMovie()
     cout << "\033[2J\033[H";
 
     cout << "Enter a title name." << endl;
-    char inputTitle[120];
+    char inputTitle[100];
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     cin.getline(inputTitle, 100);
+    while (inputTitle[0] == '\0')
+    {
+        cout << "The title cannot be an empty string." << endl;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin.getline(inputTitle, 100);
+    }
 
     cout << "Enter year of release." << endl;
     int inputYear;
     cin >> inputYear;
     std::cin.clear();
+    while (inputYear < 1888 || inputYear>2025)
+    {
+        cout << "Invalid year, try again." << endl;
+        cin >> inputYear;
+        std::cin.clear();
+    }
 
     cout << "Enter the genre." << endl;
     char inputGenre[50];
     cin.clear();
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    cin.getline(inputGenre, 100);
+    cin.getline(inputGenre, 50);
+    while (inputGenre[0] == '\0')
+    {
+        cout << "The genre cannot be an empty string." << endl;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin.getline(inputGenre, 50);
+    }
 
     cout << "Enter the director's name." << endl;
     char inputDirector[50];
     cin.clear();
-    cin.getline(inputDirector, 100);
+    cin.getline(inputDirector, 50);
+    while (inputDirector[0] == '\0')
+    {
+        cout << "The director's name cannot be an empty string." << endl;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin.getline(inputDirector, 50);
+    }
 
     cout << "Enter the names of the cast, divided by commas." << endl;
-    char inputCast[100];
+    char inputCast[270];
     cin.clear();
-    cin.getline(inputCast, 100);
+    cin.getline(inputCast, 270);
+    while (inputCast[0] == '\0')
+    {
+        cout << "The cast cannot be an empty string." << endl;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin.getline(inputCast, 100);
+    }
 
     cout << "Enter a rating." << endl;
-    double inputRating;
-    cin >> inputRating;
+    char inputRating[10];
+    cin.clear();
+    cin.getline(inputRating, 10);
+    while (!isValidRating(inputRating))
+    {
+        cin.clear();
+        cin.getline(inputRating, 10);
+    }
 
     cout << "How many people have rated the movie? Enter 1 if you have no information." << endl;
     int inputCountR;
     cin >> inputCountR;
+    while (inputCountR < 1)
+    {
+        cin >> inputCountR;
+    }
 
     Movie newMovie;
     int i;
@@ -570,15 +872,42 @@ void addMovie()
     }
     newMovie.cast[i] = '\0';
 
-    newMovie.rating = inputRating;
+    newMovie.rating = 0.0;
+    int index = 0;
+    bool decimalFound = false;
+    double decimalPlace = 0.1;
+    while (inputRating[index] != '\0') {
+        if (inputRating[index] == '.') {
+            decimalFound = true;
+        }
+        else {
+            if (decimalFound) {
+                newMovie.rating += (inputRating[index] - '0') * decimalPlace;
+                decimalPlace /= 10;
+            }
+            else {
+                newMovie.rating = newMovie.rating * 10 + (inputRating[index] - '0');
+            }
+        }
+        index++;
+    }
 
     newMovie.ratingsCount = inputCountR;
 
     int mCount = movieCount(movies);
+    if (mCount == 29)
+    {
+        cerr << "You cannot add movies at the moment. Delete or edit existing ones." << endl;
+        return;
+    }
     movies[mCount] = newMovie;
     saveInFile(movies);
+    delete[] movies;
 }
 
+/// <summary>
+/// Allows admins to edit existing movies.
+/// </summary>
 void editMovie()
 {
     Movie* movies = openFile();
@@ -622,11 +951,32 @@ void editMovie()
                 cin >> choice;
                 switch(choice)
                 { 
-                case '0': return; break;
+                case '0':
+                {
+                    saveInFile(movies);
+                    delete[] movies;
+                    return;
+                    break;
+                }
                 case '1': 
                 {
                     cout << "Enter a new title"<<endl;
-                    cin>>movies[i].title; 
+                    char inputTitle[100];
+                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cin.clear();
+                    cin.getline(inputTitle, 100);
+                    while (inputTitle[0] == '\0')
+                    {
+                        cout << "The title cannot be an empty string." << endl;
+                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        std::cin.clear();
+                        cin.getline(inputTitle, 100);
+                    }
+                    int j = 0;
+                    for (j = 0; inputTitle[j] != '\0'; ++j) {
+                        movies[i].title[j] = inputTitle[j];
+                    }
+                    movies[i].title[j] = '\0';
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
@@ -635,35 +985,123 @@ void editMovie()
                 case '2': 
                 {
                     cout << "Enter a new release year" << endl;
-                    cin >> movies[i].year;
+                    int inputYear;
+                    cin >> inputYear;
+                    std::cin.clear();
+                    while (inputYear < 1888 || inputYear>2025)
+                    {
+                        cout << "Invalid year, try again." << endl;
+                        cin >> inputYear;
+                        std::cin.clear();
+                    }
+                    movies[i].year = inputYear;
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
                 }
                 case '3': {
                     cout << "Enter a new genre" << endl;
-                    cin >> movies[i].genre;
+                    char inputGenre[50];
+                    cin.clear();
+                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    cin.getline(inputGenre, 50);
+                    while (inputGenre[0] == '\0')
+                    {
+                        cout << "The genre cannot be an empty string." << endl;
+                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        std::cin.clear();
+                        cin.getline(inputGenre, 50);
+                    }
+                    int j = 0;
+                    for (j = 0; inputGenre[j] != '\0'; ++j) {
+                        movies[i].genre[j] = inputGenre[j];
+                    }
+                    movies[i].genre[j] = '\0';
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
                 }
                 case '4': {
                     cout << "Enter a new director" << endl;
-                    cin >> movies[i].director;
+                    char inputDirector[50];
+                    cin.clear();
+                    cin.getline(inputDirector, 50);
+                    while (inputDirector[0] == '\0')
+                    {
+                        cout << "The director's name cannot be an empty string." << endl;
+                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        std::cin.clear();
+                        cin.getline(inputDirector, 50);
+                    }
+                    int j = 0;
+                    for (j = 0; inputDirector[j] != '\0'; ++j) {
+                        movies[i].director[j] = inputDirector[j];
+                    }
+                    movies[i].director[j] = '\0';
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
                 }
                 case '5': {
                     cout << "Enter a new cast" << endl;
-                    cin >> movies[i].cast;
+                    char inputCast[270];
+                    cin.clear();
+                    cin.getline(inputCast, 270);
+                    while (inputCast[0] == '\0')
+                    {
+                        cout << "The cast cannot be an empty string." << endl;
+                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        std::cin.clear();
+                        cin.getline(inputCast, 100);
+                    }
+                    int j = 0;
+                    for (j = 0; inputCast[j] != '\0'; ++j) {
+                        movies[i].cast[j] = inputCast[j];
+                    }
+                    movies[i].cast[j] = '\0';
+                    cout << "\033[2J\033[H";
+                    printMovie(movies[i]);
+                    break;
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
                 }
                 case '6': {
                     cout << "Enter a new rating" << endl;
-                    cin >> movies[i].rating;
+                    char inputRating[10];
+                    cin.clear();
+                    cin.getline(inputRating, 10);
+                    while (!isValidRating(inputRating))
+                    {
+                        cin.clear();
+                        cin.getline(inputRating, 10);
+                    }
+
+                    double newRating = 0.0;
+                    int index = 0;
+                    bool decimalFound = false;
+                    double decimalPlace = 0.1;
+                    while (inputRating[index] != '\0')
+                    {
+                        if (inputRating[index] == '.')
+                        {
+                            decimalFound = true;
+                        }
+                        else
+                        {
+                            if (decimalFound)
+                            {
+                                newRating += (inputRating[index] - '0') * decimalPlace;
+                                decimalPlace /= 10;
+                            }
+                            else
+                            {
+                                newRating = newRating * 10 + (inputRating[index] - '0');
+                            }
+                        }
+                        index++;
+                    }
+                    movies[i].rating = newRating;
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
@@ -676,14 +1114,60 @@ void editMovie()
         }
         
     }
-    saveInFile(movies);
+    
 }
 
+/// <summary>
+/// Allows admins to delete a movie
+/// </summary>
 void deleteMovie()
 {
+    Movie* movies = openFile();
+    //ANSI code to clear the console.
+    cout << "\033[2J\033[H";
+    cout << "Which movie would you like to delete?" << endl;
+    char inputTitle[50];
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.getline(inputTitle, 100);
+    cout << endl;
+    if (movies == nullptr)
+    {
+        cerr << "No data!" << endl;
+        return;
+    }
+    int i = 0;
+    for (i = 0; i < 30; i++)
+    {
 
+        if (movies[i].title[0] == '\0')
+        {
+            cerr << "There was no movie found with this title." << endl;
+            return;
+        }
+        if (strCompare(movies[i].title, inputTitle) == 0)
+        {
+            int cMovies = movieCount(movies);
+            if (i == cMovies - 1)
+            {
+                movies[i].title[0] = '\0';
+                break;
+            }
+            for (i = 0; i < cMovies-1; i++)
+            {
+                movies[i] = movies[i + 1];
+            }
+            movies[i].title[0] = '\0';
+            break;
+        }
+    }
+    saveInFile(movies);
+    delete[] movies;
 }
 
+/// <summary>
+/// Manages the choice for menu.
+/// </summary>
+/// <param name="isAdmin">True if your role is Admin, otherwise false.</param>
 void manageMenuChoice(bool isAdmin)
 {
     char choice;
@@ -695,16 +1179,17 @@ void manageMenuChoice(bool isAdmin)
             case '0': return; break;
             case '1': seeAllMovies(); break;
             case '2': addRating(); break;
-            case '3': sortMoviesByRating(); break;
+            case '3': manageSortChoice(); break;
             case '4': searchMoviesByTitle(); break;
             case '5': searchMoviesByGenre(); break;
             case '6': addMovie(); break;
             case '7': editMovie(); break;
-            case '8': break;
+            case '8': deleteMovie(); break;
             default: break;
         }
     }
 }
+
 int main()
 {
     bool isAdmin;
