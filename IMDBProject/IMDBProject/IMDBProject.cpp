@@ -1,3 +1,16 @@
+/*
+* Solution to course project # 6
+* Introduction to programming course
+* Faculty of Matematics and Informatics of Sofia University
+* Winter semester 2023/2024
+* 
+* @author Petya Savova Hrusanova
+* @idnumber 7MI0600437
+* @compiler vss
+* 
+* <file with functions and main>
+*/
+
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -101,17 +114,17 @@ bool isSubstring(const char* str1, const char* str2)
 bool signIn()
 {   
     cout << "Welcome to IMDB!" << endl;
-    cout << "Sign in as: " << endl 
-         << "1.User" << endl 
-         << "2.Admin" << endl;
+    cout << "Sign in as: " << endl
+        << "1.User" << endl
+        << "2.Admin" << endl;
     char choice;
     cin >> choice;
-    while (choice != '1' && choice != '2')
+    while (choice != '1' && choice != '2') 
     {
         cout << "Invalid input! Try again!" << endl;
         cin >> choice;
     }
-    if (choice == '2')
+    if (choice == '2') 
     {
         //ANSI code to clear the console.
         cout << "\033[2J\033[H";
@@ -186,12 +199,30 @@ int movieCount(Movie* movies)
 }
 
 /// <summary>
+/// Checks if every character in the array is a digit.
+/// </summary>
+/// <param name="text"></param>
+/// <returns>True if all the characters are digits, false otherwise.</returns>
+bool checkDigits(char text[])
+{
+    int i = 0;
+    while (text[i] != '\0')
+    {
+        if (text[i] < '0' || text[i]>'9') return false;
+        i++;
+    }
+    return true;
+}
+
+/// <summary>
 /// Validates whether the input string has correct values to be a rating.
 /// </summary>
 /// <param name="input">Input string of rating.</param>
 /// <returns>True if the value is correct, false otherwise.</returns>
 bool isValidRating(const char* input)
 {
+    if (input[0] == '\0') return false;
+    if (input[1] != '\0' && input[1] != '.') return false;
     int i = 0;
     bool decimalFound = false;
     int digitCountAfterDecimal = 0;
@@ -516,18 +547,17 @@ void addRating()
     int i = 0;
     int mCount = movieCount(movies);
     for ( i = 0; i <mCount; i++)
-    {
-       
-        if (movies[i].title[0] == '\0')
-        {
-            cerr << "There was no movie found with this title." << endl;
-            return;
-        }
+    {                       
         if (strCompare(movies[i].title, inputTitle) == 0)
         {
             break;
         }
     } 
+    if (i == mCount)
+    {
+        cerr << "There was no movie found with this title." << endl;
+        return;
+    }
     //Adding a rating and validating input
     cout << "How would you rate the movie " << movies[i].title << "?" << endl;
     char inputRating[10];
@@ -535,6 +565,7 @@ void addRating()
     cin.getline(inputRating, 10);
     while (!isValidRating(inputRating))
     {
+        cout << "Add a valid rating!" << endl;
         cin.clear();
         cin.getline(inputRating, 10);
     }
@@ -749,7 +780,7 @@ void searchMoviesByTitle()
 
         if (movies[i].title[0] == '\0')
         {
-            cerr << "There was no movie found with this title." << endl;
+            cerr << "There was no other movie found with this title." << endl;
             return;
         }
         if (isSubstring(movies[i].title,inputTitle))
@@ -811,19 +842,21 @@ void addMovie()
     while (inputTitle[0] == '\0')
     {
         cout << "The title cannot be an empty string." << endl;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cin.getline(inputTitle, 100);
     }
 
     cout << "Enter year of release." << endl;
-    int inputYear;
-    cin >> inputYear;
+    char inputY[20];
+    int inputYear;    
     std::cin.clear();
-    while (inputYear < 1888 || inputYear>2025)
+    cin >> inputY;
+    inputYear = (inputY[0] - '0') * 1000 + (inputY[1] - '0') * 100 + (inputY[2] - '0') * 10 + (inputY[3] - '0');
+    while (inputY[4] != '\0' || !checkDigits(inputY) || (inputYear<=1888 || inputYear>=2025))
     {
-        cout << "Invalid year, try again." << endl;
-        cin >> inputYear;
+        cout << "Invalid year, try again." << endl; 
         std::cin.clear();
+        cin >> inputY;
+        inputYear = (inputY[0] - '0') * 1000 + (inputY[1] - '0') * 100 + (inputY[2] - '0') * 10 + (inputY[3] - '0');
     }
 
     cout << "Enter the genre." << endl;
@@ -834,7 +867,6 @@ void addMovie()
     while (inputGenre[0] == '\0')
     {
         cout << "The genre cannot be an empty string." << endl;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cin.getline(inputGenre, 50);
     }
 
@@ -845,7 +877,6 @@ void addMovie()
     while (inputDirector[0] == '\0')
     {
         cout << "The director's name cannot be an empty string." << endl;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cin.getline(inputDirector, 50);
     }
 
@@ -856,7 +887,6 @@ void addMovie()
     while (inputCast[0] == '\0')
     {
         cout << "The cast cannot be an empty string." << endl;
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         cin.getline(inputCast, 100);
     }
 
@@ -866,6 +896,7 @@ void addMovie()
     cin.getline(inputRating, 10);
     while (!isValidRating(inputRating))
     {
+        cout << "Enter a valid rating!" << endl;
         cin.clear();
         cin.getline(inputRating, 10);
     }
@@ -998,7 +1029,7 @@ void editMovie()
                     while (inputTitle[0] == '\0')
                     {
                         cout << "The title cannot be an empty string." << endl;
-                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        //cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cin.clear();
                         cin.getline(inputTitle, 100);
                     }
@@ -1014,20 +1045,24 @@ void editMovie()
                     
                 case '2': 
                 {
-                    cout << "Enter a new release year" << endl;
+                    cout << "Enter a new release year." << endl;
+                    char inputY[20];
                     int inputYear;
-                    cin >> inputYear;
                     std::cin.clear();
-                    while (inputYear < 1888 || inputYear>2025)
+                    cin >> inputY;
+                    inputYear = (inputY[0] - '0') * 1000 + (inputY[1] - '0') * 100 + (inputY[2] - '0') * 10 + (inputY[3] - '0');
+                    while (inputY[4] != '\0' || !checkDigits(inputY) || (inputYear <= 1888 || inputYear >= 2025))
                     {
                         cout << "Invalid year, try again." << endl;
-                        cin >> inputYear;
                         std::cin.clear();
+                        cin >> inputY;
+                        inputYear = (inputY[0] - '0') * 1000 + (inputY[1] - '0') * 100 + (inputY[2] - '0') * 10 + (inputY[3] - '0');
                     }
                     movies[i].year = inputYear;
                     cout << "\033[2J\033[H";
                     printMovie(movies[i]);
                     break;
+
                 }
                 case '3': {
                     cout << "Enter a new genre" << endl;
@@ -1038,7 +1073,6 @@ void editMovie()
                     while (inputGenre[0] == '\0')
                     {
                         cout << "The genre cannot be an empty string." << endl;
-                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cin.clear();
                         cin.getline(inputGenre, 50);
                     }
@@ -1059,7 +1093,6 @@ void editMovie()
                     while (inputDirector[0] == '\0')
                     {
                         cout << "The director's name cannot be an empty string." << endl;
-                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cin.clear();
                         cin.getline(inputDirector, 50);
                     }
@@ -1080,7 +1113,6 @@ void editMovie()
                     while (inputCast[0] == '\0')
                     {
                         cout << "The cast cannot be an empty string." << endl;
-                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cin.clear();
                         cin.getline(inputCast, 100);
                     }
@@ -1100,11 +1132,12 @@ void editMovie()
                     cout << "Enter a new rating" << endl;
                     char inputRating[10];
                     cin.clear();
-                    cin.getline(inputRating, 10);
+                    cin>>inputRating;
                     while (!isValidRating(inputRating))
                     {
+                        cout << "Enter a valid rating." << endl;
                         cin.clear();
-                        cin.getline(inputRating, 10);
+                        cin>>inputRating;
                     }
 
                     double newRating = 0.0;
