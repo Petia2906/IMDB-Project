@@ -117,14 +117,14 @@ bool signIn()
     cout << "Sign in as: " << endl
         << "1.User" << endl
         << "2.Admin" << endl;
-    char choice;
+    char choice[20];
     cin >> choice;
-    while (choice != '1' && choice != '2') 
+    while ((choice[0] != '1' && choice[0] != '2') || choice[1]!='\0')
     {
         cout << "Invalid input! Try again!" << endl;
         cin >> choice;
     }
-    if (choice == '2') 
+    if (choice[0] == '2')
     {
         //ANSI code to clear the console.
         cout << "\033[2J\033[H";
@@ -158,17 +158,17 @@ char menu(bool isAdmin)
              << "8.Delete a movie" << endl;
     }
     cout << "0.Exit" << endl;
-    char choice;
+    char choice[20];
     bool isChoiceValid = false;
     while (!isChoiceValid)
     {   
         cin >> choice;
-        if (choice < '0' || choice>'8')
+        if (choice[0] < '0' || choice[0]>'8' || choice[1]!='\0')
         {
             cout << "Invalid command! Try again!" << endl;
             isChoiceValid = false;
         }
-        else if (!isAdmin && (choice == '6' || choice == '7' || choice == '8'))
+        else if (!isAdmin && (choice[0] == '6' || choice[0] == '7' || choice[0] == '8'))
         {
             cout << "Invalid command! Try again!" << endl;
             isChoiceValid = false;
@@ -178,7 +178,7 @@ char menu(bool isAdmin)
             isChoiceValid = true;
         }           
     }
-    return choice;
+    return choice[0];
 }
 
 /// <summary>
@@ -738,18 +738,18 @@ void manageSortChoice()
         << "1. By title" << endl
         << "2. By rating" << endl;
     bool isValidChoice = false;
-    char choice;
+    char choice[20];
     cin >> choice;
-    if (choice != '1' && choice != '2')
+    if (choice[0] != '1' && choice[0] != '2')
     {
         while (!isValidChoice)
         {
             cout << "Wrong input! Try againg!" << endl;
             cin >> choice;
-            if (choice == '1' || choice == '2') isValidChoice = true;
+            if (choice[0] == '1' || choice[0] == '2' || choice[1]=='\0') isValidChoice = true;
         }
     }
-    switch (choice)
+    switch (choice[0])
     {
     case '1': sortMoviesByTitle(); break;
     case '2': sortMoviesByRating(); break;
