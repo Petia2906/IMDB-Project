@@ -1,6 +1,19 @@
 # IMDB Project
- 
-A small project where you manage movie information.
-It supports two roles - User and Admin
-The program prints out movies and the users rate, sort, filter or search them.
-Admins have these functionalities but they can also add new movies and edit or delete existing ones. 
+
+## Цел
+IMDB Project е малък проект за управление на филмова информация и рейтинги.
+## Роли
+Програмата поддържа две потребителски роли: <ins>User</ins>- потребител и <ins>Admin</ins>- администратор. Администраторът има право на повече функционалности.
+## Функционалности
+1. Списък с всички филми
+2. Добавяне на рейтинг
+3. Сортиране на филми (по заглавие и рейтинг), както и филтриране по рейтинг
+4. Търсене по заглавие или част от заглавие
+5. Търсене по жанр
+   
+### Функционалности само за администратора
+6. Добавяне на филм
+7. Промяна на вече добавен филм
+8. Изтриване на филм
+
+
